@@ -142,10 +142,13 @@ def best_features_based_p_maps(data, lbls_type, lbls_reg, threshold, n_clusters,
     # create probabilistic map between m-types from different regions
     count_maps_m = create_count_maps(data, lbls_type, lbls_reg, features, n_clusters=n_clusters)
     # put regions in order
-    count_maps_m = {reg1: count_maps_m[reg1], reg2: count_maps_m[reg2]} 
-    p_map = create_probabilistic_map(count_maps_m)
+    count_maps_m_1_2 = {reg1: count_maps_m[reg1], reg2: count_maps_m[reg2]} 
+    p_map_1_2 = create_probabilistic_map(count_maps_m_1_2)
+
+    count_maps_m_2_1 = {reg2: count_maps_m[reg2], reg1: count_maps_m[reg1]} 
+    p_map_2_1 = create_probabilistic_map(count_maps_m_2_1)
     
-    return p_map, features
+    return p_map_1_2, p_map_2_1, features
 
 def geneSelection_Kobak(data, threshold=0, atleast=10,
                   yoffset=.02, xoffset=5, decay=1.5, n=None,

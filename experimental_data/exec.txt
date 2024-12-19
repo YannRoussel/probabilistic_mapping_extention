@@ -1,0 +1,60 @@
+# SCALA:
+
+##metadata
+https://download.brainimagelibrary.org/3a/88/3a88a7687ab66069/m1_patchseq_meta_data.csv  
+
+## Electrophysiology:
+### main dataset:
+dandi download DANDI:000008/0.211014.0809
+### physiological dataset:
+dandi download DANDI:000035/0.211014.0808
+
+## Morphologies:
+python morphologies/dl_scala_morphologies.py
+
+## scRNAseq:
+python rna/dl_rna_data_scala.py
+
+# GOUWENS:
+
+##metadata
+
+## Electrophysiology
+dandi download DANDI:000020/0.210913.1639
+
+## Morphologies
+python morphologies/dl_gouwens_morphologies.py
+
+## scRNAseq
+python rna/dl_rna_data_gouwens.py
+
+# Yao et al. realigned
+sh download_rna.sh
+
+# canonical m_types (Lida's)
+
+/local/test_cluster.csv
+
+
+# e-features from EFel
+
+## BBP
+
+### collection of cells
+/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/18122023
+### cell_wise
+/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/sscx_cellwise
+###cell_wise e-types
+/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/sscx_cellwise_petilla_etypes.py
+
+## Scala
+
+### 34 degrees 
+/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/18122023
+
+### RT
+/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/19122023/scala_roomtemp 
+
+## Gouwens
+/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/allen_34_VCtx_partial
+

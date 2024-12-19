@@ -203,6 +203,7 @@ def plot_map(data, title):
                 plt.text(x + 0.5, y + 0.5, int(100*data.values[y, x]),
                          horizontalalignment='center',
                          verticalalignment='center',
+                         fontsize=8
                          )
 
     plt.colorbar(heatmap)
@@ -361,29 +362,39 @@ def compute_and_plot_maps(alignement_complete,mask, mask_name):
     plt.ylabel("Old t-type")
 
 def plot_combined_maps(map_exc, map_inh):
-    plt.figure(figsize=(20, 20))
+
+    tick_label_fontsize = 8
+    plt.figure(figsize=(11, 15))
 
     # Plot maps for mask_exc
     plt.subplot(221)
-    plot_map(map_exc.div(np.sum(map_exc, axis=1), axis=0), "P(old|new) (Excitatory)")
+    plot_map(map_exc.div(np.sum(map_exc, axis=1), axis=0), "P(new|old) (Excitatory)")
     plt.xlabel("New t-type")
     plt.ylabel("Old t-type")
+    plt.xticks(fontsize=tick_label_fontsize)  # Adjust x-axis tick label fontsize
+    plt.yticks(fontsize=tick_label_fontsize)
 
     plt.subplot(222)
-    plot_map(map_exc.div(np.sum(map_exc, axis=0), axis=1), "P(new|old) (Excitatory)")
+    plot_map(map_exc.div(np.sum(map_exc, axis=0), axis=1), "P(old|new) (Excitatory)")
     plt.xlabel("New t-type")
     plt.ylabel("Old t-type")
+    plt.xticks(fontsize=tick_label_fontsize)  # Adjust x-axis tick label fontsize
+    plt.yticks(fontsize=tick_label_fontsize)
 
     # Plot maps for mask_inh
     plt.subplot(223)
-    plot_map(map_inh.div(np.sum(map_inh, axis=1), axis=0), "P(old|new) (Inhibitory)")
+    plot_map(map_inh.div(np.sum(map_inh, axis=1), axis=0), "P(new|old) (Inhibitory)")
     plt.xlabel("New t-type")
     plt.ylabel("Old t-type")
+    plt.xticks(fontsize=tick_label_fontsize)  # Adjust x-axis tick label fontsize
+    plt.yticks(fontsize=tick_label_fontsize)
 
     plt.subplot(224)
-    plot_map(map_inh.div(np.sum(map_inh, axis=0), axis=1), "P(new|old) (Inhibitory)")
+    plot_map(map_inh.div(np.sum(map_inh, axis=0), axis=1), "P(old|new) (Inhibitory)")
     plt.xlabel("New t-type")
     plt.ylabel("Old t-type")
+    plt.xticks(fontsize=tick_label_fontsize)  # Adjust x-axis tick label fontsize
+    plt.yticks(fontsize=tick_label_fontsize)
 
     plt.tight_layout()
     plt.savefig("maps_combined.png")  # Save the figure
@@ -414,6 +425,12 @@ def main():
 
     RNA = (RNA_e + RNA_i)
     RNA = RNA.reindex(Scala_meta_data.index)
+
+    # add gene selection on RNA here (and merge with Gouwens)
+    selected_genes_scala = geneSelection(RNA.values, yoffset=.04, xoffset=6.2, decay=1.2)
+    # selected_genes_scala = geneSelection(RNA.values, yoffset=.04, xoffset=6, decay=1.2)
+    selected_genes_scala = RNA.columns[selected_genes_scala]
+    RNA = RNA[selected_genes_scala]
 
     adata_scala, adata_merfish, adata_concat = merge_datasets(yao, Scala_meta_data, RNA, unique_genes)
 

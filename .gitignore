@@ -1,6 +1,6 @@
 .DS_Store
 .requirements.txt.swp
-
+./densities_app/warped_augmented_CCFv3/
 benchmark_lasso_mutual_info.png
 benchmark_lasso_random_forest.png
 benchmark_random_forest_mutual_info.png

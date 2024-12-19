@@ -44,7 +44,7 @@ def convert_json_to_pd_e_features(path):
 
 def plot_map(data, title, filename):
     """Plot and save heatmap of data."""
-    plt.figure(figsize=(25,10))
+    plt.figure(figsize=(5.4, 3))
     heatmap = plt.pcolor(data.values, cmap="jet")
 
     for y in range(data.shape[0]):
@@ -229,7 +229,7 @@ def main():
     combined_labels = np.asarray(combined_labels)
     combined_dset_labels = ["scala_rt"] * len(scala_used_labels) + ["sscx_sc"] * len(labels_sscx_sc)
 
-    p_e_t, e_features = best_features_based_p_maps(combined_e_feature_df, combined_labels, combined_dset_labels, 
+    p_e_t, p_t_e, e_features = best_features_based_p_maps(combined_e_feature_df, combined_labels, combined_dset_labels, 
                                                    threshold=.9, n_clusters=4,
                                                    reg1="sscx_sc", reg2="scala_rt")
     
@@ -248,17 +248,48 @@ def main():
         p_e_t.at['cAC', col] = p_e_t.at['cAC', col] + p_e_t.at['cADpyr', col]
         p_e_t.at['cADpyr', col] = 0
 
-    p_e_t.to_csv("p_e_t.csv")
-    plot_map(p_e_t, "P(sscx|rt) yao", "p_sscx_rt_yao.png")
 
-    canonical_types = pd.read_csv("/Users/yroussel/Documents/data/Patch Seq data/test_cluster.csv", index_col=0, header=None)
+    p_e_t.to_csv("p_e_t.csv")
+    p_t_e.to_csv("p_t_e.csv")
+
+    # Keywords to group by
+    keywords = ["Pvalb", "Sst", "Lamp5", "Vip", "Sncg"]
+    kept_ttype_for_emap = [("Pvalb" in x)|("Sst" in x)|("Lamp5" in x)|("Vip" in x)|("Sncg" in x) 
+                           for x in p_t_e.index]
+    kept_ttype_for_emap = p_t_e.index[kept_ttype_for_emap]
+    p_t_e_plot = p_t_e.T[kept_ttype_for_emap].T
+    p_t_e_plot = p_t_e_plot.div(np.sum(p_t_e_plot, axis=0), axis=1)
+    p_t_e_plot = p_t_e_plot.drop(["cADpyr"], axis=1)
+    p_t_e_plot = p_t_e_plot.reindex(["bAC", "bNAC", "bIR", "cIR", "bNAC", "bSTUT", "cSTUT", "dNAC", "dSTUT"], axis=1)
+    
+     # Group by the first matching keyword in the index
+    def group_by_keyword(idx):
+        for keyword in keywords:
+            if keyword.lower() in idx.lower():  # Case-insensitive matching
+                return keyword
+        return "Other"  # For rows that don't match any keyword
+    # Create a new column for the group
+    p_t_e_plot["group"] = p_t_e_plot.index.map(group_by_keyword)
+
+    # Group by the 'group' column and sum the rows
+    p_t_e_plot_grouped = p_t_e_plot.groupby("group").sum()
+
+    # Drop the 'group' column from the result (if it exists)
+    p_t_e_plot_grouped.drop(columns="group", errors="ignore", inplace=True)
+
+    plot_map(p_e_t, "P(sscx|rt) yao", "p_sscx_rt_yao.png")
+    plot_map(p_t_e_plot_grouped, "P(t-type|e-type) cortical inhibitory neurons", "p_t_e.png")
+
+    # canonical_types = pd.read_csv("/Users/yroussel/Documents/data/Patch Seq data/test_cluster.csv", index_col=0, header=None)
+    canonical_types = pd.read_csv("../lida_m_types/Results_09_2024/test_cluster.csv", index_col=0, header=None)
     canonical_types = canonical_types.rename({i: x for i, x in enumerate(["name", "class", "dendrites", "axon"])}, axis=1)
     canonical_types = canonical_types.rename({x: x.split(".")[0] for x in canonical_types.index}, axis=0)
 
     gouwens_idx_dict = {x: x.split("_")[0] for x in canonical_types.index if "sample" not in x}
     canonical_types = canonical_types.rename(gouwens_idx_dict, axis=0)
 
-    dict_mclass = {0.0: "IN", 1.0: "PC"}
+    # dict_mclass = {0.0: "IN", 1.0: "PC"}
+    dict_mclass = {0.0: "PC", 1.0: "IN"}
     dict_dendclass = {x: "dend_" + str(int(x)) for x in np.unique(canonical_types["dendrites"])}
     dict_axclass = {x: "ax_" + str(int(x)) for x in np.unique(canonical_types["axon"])}
     dict_mlabels = {"class": dict_mclass, "dendrites": dict_dendclass, "axon": dict_axclass}
@@ -299,6 +330,9 @@ def main():
     p_me_t = pd.concat(df_coll, axis=1)
     p_me_t = p_me_t.rename({x: x.replace(" ", "_") for x in p_me_t.index}, axis=0)
 
+    # Drop columns then rows where the sum is not > 0
+    p_me_t = p_me_t.loc[:, p_me_t.sum() > 0]
+    p_me_t = p_me_t.loc[p_me_t.sum(axis=1) > 0]
     plot_map(p_me_t, "P(bbp_e__canonical_m|yao_t)", "p_bbp_e_canonical_m_yao_t.png")
     p_me_t.to_csv("p_me_t.csv")
 

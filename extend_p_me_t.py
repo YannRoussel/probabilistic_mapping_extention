@@ -21,11 +21,11 @@ gene_expression_df = yao_RNA.T[covered_t_types].T
 uncovered_t_types_df = yao_RNA.T[uncovered_t_types].T
 
 # Gene selection functions
-def select_genes_for_efeatures(gene_expression, e_features, method='lasso', alpha=0.01, max_iter=5000):
+def select_genes_for_efeatures(gene_expression, e_features, method='lasso', alpha=0.01, max_iter=10000):
     if method == 'lasso':
         model = MultiTaskLassoCV(alphas=[alpha], cv=5, max_iter=max_iter).fit(gene_expression.values, e_features.values)
     elif method == 'random_forest':
-        model = RandomForestRegressor(n_estimators=100, random_state=42).fit(gene_expression.values, e_features.values)
+        model = RandomForestRegressor(n_estimators=1000, random_state=42).fit(gene_expression.values, e_features.values)
     else:
         raise ValueError("Method not supported")
     importance_scores = np.abs(model.coef_).mean(axis=0) if method == 'lasso' else model.feature_importances_
@@ -38,7 +38,7 @@ def select_genes_for_mtypes(gene_expression, m_types, method='logistic_regressio
         model = LogisticRegressionCV(cv=cv, random_state=random_state, max_iter=max_iter).fit(gene_expression.values, m_types)
         importance_scores = np.abs(model.coef_).mean(axis=0)
     elif method == 'random_forest':
-        model = RandomForestClassifier(n_estimators=100, random_state=random_state).fit(gene_expression.values, m_types)
+        model = RandomForestClassifier(n_estimators=1000, random_state=random_state).fit(gene_expression.values, m_types)
         importance_scores = model.feature_importances_
     elif method == 'mutual_info':
         importance_scores = mutual_info_classif(gene_expression.values, m_types, random_state=random_state)
@@ -82,10 +82,15 @@ def mean_absolute_error(actual, predicted):
 def kullback_leibler_divergence(p, q):
     p = np.asarray(p, dtype=float)
     q = np.asarray(q, dtype=float)
-    return np.sum(np.where(p != 0, p * np.log(p / q), 0))
+    # Add a small epsilon to avoid division by zero
+    epsilon = 1e-10
+    p = np.clip(p, epsilon, None)
+    q = np.clip(q, epsilon, None)
+    return np.sum(p * np.log(p / q))
 
 # Evaluation
 def evaluate_n_choices(covered_p_me_t, gene_expression_scaled_df, n_choices, m_labels=None):
+
     errors = {n: [] for n in n_choices}
     
     if m_labels is not None and len(np.unique(m_labels)) > 1:
@@ -101,6 +106,7 @@ def evaluate_n_choices(covered_p_me_t, gene_expression_scaled_df, n_choices, m_l
         actual_p_me_t = covered_p_me_t.iloc[test_index]
         
         train_distance_matrix = cdist(test_data, train_data, metric='euclidean')
+        train_distance_matrix = np.nan_to_num(train_distance_matrix)
         
         for n in n_choices:
             predicted_p_me_t = []
@@ -111,12 +117,20 @@ def evaluate_n_choices(covered_p_me_t, gene_expression_scaled_df, n_choices, m_l
                 predicted_p_me_t.append(avg_probabilities)
                 
             predicted_p_me_t = pd.DataFrame(predicted_p_me_t, index=actual_p_me_t.index, columns=actual_p_me_t.columns)
-            
+            predicted_p_me_t = predicted_p_me_t.div(predicted_p_me_t.sum(axis=1), axis=0)
+
             mse = mean_squared_error(actual_p_me_t, predicted_p_me_t)
             mae = mean_absolute_error(actual_p_me_t, predicted_p_me_t)
             kld = kullback_leibler_divergence(actual_p_me_t.values.flatten(), predicted_p_me_t.values.flatten())
             
             errors[n].append((mse, mae, kld))
+
+            if len(errors[n]) == 0:
+                print(f"No errors collected for N={n}")
+
+    print("Actual p_me_t shape:", actual_p_me_t.shape)
+    print("Predicted p_me_t shape:", predicted_p_me_t.shape)
+    print("Train distance matrix shape:", train_distance_matrix.shape)
     
     return errors
 
@@ -136,6 +150,19 @@ def benchmark_and_plot(covered_p_me_t, gene_expression, e_features, m_labels, n_
     # e_methods = ['random_forest']
     m_methods = ['logistic_regression', 'random_forest', 'mutual_info']
     # m_methods = ['random_forest']
+
+    scaler = StandardScaler()
+    gene_expression = pd.DataFrame(
+        scaler.fit_transform(gene_expression),
+        index=gene_expression.index,
+        columns=gene_expression.columns
+    )
+    e_features = pd.DataFrame(
+        scaler.fit_transform(e_features),
+        index=e_features.index,
+        columns=e_features.columns
+    )
+
     
     for e_method in e_methods:
         for m_method in m_methods:
@@ -149,6 +176,7 @@ def benchmark_and_plot(covered_p_me_t, gene_expression, e_features, m_labels, n_
             top_genes = combine_feature_selection(gene_importance_e, gene_importance_m, top_n=max(top_genes_nums))
             top_gene_names = top_genes['gene'].values
             gene_expression_filtered = gene_expression[top_gene_names]
+            assert len(top_genes) > 0
 
             # Scaling
             combined_df = pd.concat([gene_expression_df[top_gene_names], uncovered_t_types_df[top_gene_names]])
@@ -160,18 +188,32 @@ def benchmark_and_plot(covered_p_me_t, gene_expression, e_features, m_labels, n_
             for top_n in top_genes_nums:
                 gene_expression_top_n = gene_expression_scaled_df.iloc[:, :top_n]
                 # gene_expression_top_n = gene_expression_filtered.iloc[:, :top_n]
-                errors = evaluate_n_choices(existing_p_me_t, gene_expression_top_n, n_choices, m_labels=None)
+                errors = evaluate_n_choices(covered_p_me_t, gene_expression_top_n, n_choices, m_labels=None)
                 all_errors[(e_method, m_method, top_n)] = errors
+                print("Shape of p_me_t:", covered_p_me_t.shape)
+                print("Shape of gene_expression_top_n:", gene_expression_top_n.shape)
+                print(f"Errors for top {top_n} genes:", errors)
             
-            fig, axs = plt.subplots(3, 1, figsize=(10, 15))
+            fig, axs = plt.subplots(3, 1, figsize=(5.5, 9))
             metrics = ['MSE', 'MAE', 'KLD']
-    
+            
             for i, metric in enumerate(metrics):
                 for top_n in top_genes_nums:
-                    avg_errors = {n: np.mean(all_errors[(e_method, m_method, top_n)][n], axis=0) for n in n_choices}
-                    axs[i].plot(n_choices, [avg_errors[n][i] for n in n_choices], label=f'Top {top_n} genes')
+                    avg_errors = {
+                        n: np.nanmean(all_errors[(e_method, m_method, top_n)][n], axis=0)
+                        for n in n_choices
+                    }  # Utilisez np.nanmean pour ignorer les NaN
+                    axs[i].plot(
+                        n_choices, 
+                        [avg_errors[n][i] if not np.isnan(avg_errors[n][i]) else 0 for n in n_choices],
+                        label=f'Top {top_n} genes'
+                    )
+            # for i, metric in enumerate(metrics):
+            #     for top_n in top_genes_nums:
+            #         avg_errors = {n: np.mean(all_errors[(e_method, m_method, top_n)][n], axis=0) for n in n_choices}
+            #         axs[i].plot(n_choices, [avg_errors[n][i] for n in n_choices], label=f'Top {top_n} genes')
                 
-                axs[i].set_title(f'{metric} vs Number of Neighbors (N) for {e_method} and {m_method}')
+                axs[i].set_title(f'{e_method} (e-features) and {m_method} (m-types)')
                 axs[i].set_xlabel('Number of Neighbors (N)')
                 axs[i].set_ylabel(metric)
                 axs[i].legend()
@@ -183,7 +225,7 @@ def benchmark_and_plot(covered_p_me_t, gene_expression, e_features, m_labels, n_
 # Run benchmark
 n_choices = [1, 2, 3, 5, 8, 10, 20]
 top_genes_nums = [50, 100, 500, 1000, 10000]
-benchmark_and_plot(existing_p_me_t, gene_expression, scala_rt_e_features_df, m_labels, n_choices, top_genes_nums)
+# benchmark_and_plot(existing_p_me_t, gene_expression, scala_rt_e_features_df, m_labels, n_choices, top_genes_nums)
 
 # Extend probabilistic map using best approach
 def extend_probabilistic_map(existing_p_me_t, uncovered_t_types_scaled_df, gene_expression_scaled_df, best_n):
@@ -214,6 +256,23 @@ gene_expression_scaled_df = pd.DataFrame(combined_scaled[:len(gene_expression_df
 uncovered_t_types_scaled_df = pd.DataFrame(combined_scaled[len(gene_expression_df):], index=uncovered_t_types_df.index, columns=top_gene_names)
 
 
-best_n = 8#analyze_errors(evaluate_n_choices(existing_p_me_t, gene_expression_scaled_df, n_choices, m_labels=None))
+best_n = 10#analyze_errors(evaluate_n_choices(existing_p_me_t, gene_expression_scaled_df, n_choices, m_labels=None))
 extended_p_me_t = extend_probabilistic_map(existing_p_me_t, uncovered_t_types_scaled_df, gene_expression_scaled_df, best_n)
+# Drop columns then rows where the sum is not > 0
+extended_p_me_t = extended_p_me_t.loc[:, extended_p_me_t.sum() > 0]
+extended_p_me_t = extended_p_me_t.loc[extended_p_me_t.sum(axis=1) > 0]
+
+# Filter common_t_types to exclude "IMN" and "NN" types
+common_t_types = extended_p_me_t.index
+msk_t_types = np.asarray([("IMN" not in x) & ("NN" not in x) for x in common_t_types])
+common_t_types = common_t_types[msk_t_types]
+
+# Reindex and normalize p_map
+extended_p_me_t = extended_p_me_t.reindex(common_t_types, axis=0)
+extended_p_me_t = extended_p_me_t.div(np.sum(extended_p_me_t, axis=1), axis=0)
+extended_p_me_t.columns = [
+    "|".join([m_type_part.upper(), e_type_part])
+    for m_type_part, e_type_part in (col.split("|") for col in extended_p_me_t.columns)
+]
+
 extended_p_me_t.to_csv("extended_p_me_t.csv")
