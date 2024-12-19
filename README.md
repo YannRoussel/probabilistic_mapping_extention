@@ -1,14 +1,15 @@
 # Probabilistic Mapping Extension
 
-The **Probabilistic Mapping Extension** is a Python package designed to facilitate the creation of probabilistic maps for voxel-based datasets. It enables efficient processing of T-type and ME-type data by generating MET-type files, using probabilistic models to map relationships between input types.
+The **Probabilistic Mapping Extension** is a Python package designed to facilitate the creation and analysis of probabilistic maps for voxel-based datasets. It provides tools to download experimental data, compute probabilistic maps, and perform optional density transcriptions and visualizations.
 
 ---
 
 ## Features
 
-- Probabilistic mapping of large datasets with ease.
-- Handles `.nrrd` files for voxel density processing.
-- Supports flexible configurations for mapping workflows.
+- Download experimental data for mapping workflows.
+- Compute probabilistic maps in a structured sequence of steps.
+- Optional transcription and visualization of voxel densities.
+- Override specific regions for custom analyses.
 
 ---
 
@@ -37,38 +38,50 @@ To install and use this package, follow these steps:
 
 ---
 
-## Usage Examples
+## Usage Guide
 
-Here are examples of how to use the **Probabilistic Mapping Extension**:
+### Step 1: Download Experimental Data
 
-### Example 1: Basic Workflow
-
-```python
-from probabilistic_mapping import process_map
-
-# Define input parameters
-input_ttype = "path/to/ttype_file.nrrd"
-input_pmap = "path/to/probability_map.csv"
-output_met_type = "path/to/output_met_type.nrrd"
-
-# Generate MET-type file
-process_map(ttype=input_ttype, pmap=input_pmap, output=output_met_type)
-print("Mapping completed!")
+Navigate to the `experimental_data` directory and run the scripts provided to download the necessary experimental data:
+```bash
+cd experimental_data
+# Run the appropriate script(s)
 ```
 
-### Example 2: Advanced Configurations
+### Step 2: Compute the Probabilistic Map
 
-```python
-from probabilistic_mapping import process_map
+Sequentially execute the scripts in the `probability_map` directory:
 
-# Custom configurations
-process_map(
-    ttype="path/to/ttype_file.nrrd",
-    pmap="path/to/probability_map.csv",
-    output="output_file.nrrd",
-    threshold=0.8,  # Only process probabilities > 0.8
-    verbose=True    # Enable detailed logs
-)
+1. Align T-types:
+   ```bash
+   python t_type_alignement.py
+   ```
+
+2. Compute the probabilistic ME-T map:
+   ```bash
+   python compute_p_me_t.py
+   ```
+
+3. Extend the ME-T map:
+   ```bash
+   python extend_p_me_t.py
+   ```
+
+### Step 3 (Optional): Transcribe and Visualize Densities
+
+1. **Transcribe T-types to ME-types**  
+   Use the `dens_app/transcribe_t_types_to_me_types.ipynb` Jupyter notebook to convert T-type densities (from another package) into ME-type densities.
+
+2. **Visualize Results**  
+   Visualize the results using the following notebooks:
+   - `dens_app/Validation_compute_m_type_gene_expressions.ipynb`
+   - `dens_app/visualisation_multiproc.ipynb`
+
+### Step 4 (Optional): Override Specific Regions
+
+Override certain ME-type densities using the `special_region_override/densities_override.py` script:
+```bash
+python special_region_override/densities_override.py
 ```
 
 ---
@@ -78,21 +91,19 @@ process_map(
 Contributions are welcome! If you'd like to contribute:
 
 1. Fork the repository.
-2. Create a new branch for your feature or bugfix.
+2. Create a new branch for your feature or bugfix:
    ```bash
    git checkout -b my-feature-branch
    ```
-3. Make your changes and commit them.
+3. Make your changes and commit them:
    ```bash
    git commit -m "Add my feature"
    ```
-4. Push to your branch.
+4. Push to your branch:
    ```bash
    git push origin my-feature-branch
    ```
 5. Open a pull request on GitHub.
-
-Please follow the guidelines in the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ---
 
@@ -106,4 +117,3 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 Special thanks to all contributors and collaborators who helped bring this project to life!
 
-# probabilistic_mapping_extention
