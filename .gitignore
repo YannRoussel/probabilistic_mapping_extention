@@ -16,3 +16,8 @@ p_me_t.csv
 Scala_aligned_labels.csv
 scala_rt_e_features_aligned_to_yao_t_types.csv
 t_and_m_types.csv
+**/.ipynb_checkpoints/
+# Ignore numpy and tiff files inside extension folder
+extension/**/*.npy
+extension/**/*.tif
+extension/**/*.tiff
