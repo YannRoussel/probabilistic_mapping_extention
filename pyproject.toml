@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "densities_app"
+version = "0.1.0"
+description = "Cell-type density analysis, probability mapping, and visualization tools."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Your Name" }
+]
+
+dependencies = [
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "matplotlib>=3.7",
+    "scipy>=1.10",
+    "seaborn>=0.12",
+    "requests>=2.28",
+    "umap-learn>=0.5",
+    "scanpy>=1.9",
+    "anndata>=0.9",
+    "mygene>=3.2"
+]
+
+[project.optional-dependencies]
+dev = [
+    "jupyter",
+    "ipywidgets",
+    "notebook"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["*.ipynb_checkpoints", "notebooks", "extension", "experimental_data"]
