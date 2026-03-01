@@ -3,18 +3,25 @@
 ## BBP
 
 ### collection of cells
-scp -r yroussel@bbpv1.epfl.ch:/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/18122023/sscx ./
+aws s3 sync s3://openbluebrain/Model_Data/Brain_atlas/Mouse/ttypes_efeatures/releases/18122023/sscx/ ./sscx --no-sign-request
+
 ### cell_wise
-scp -r yroussel@bbpv1.epfl.ch:/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/sscx_cellwise/ ./
+aws s3 sync s3://openbluebrain/Model_Data/Brain_atlas/Mouse/ttypes_efeatures/releases/20122023/sscx_cellwise/ ./sscx_cellwise --no-sign-request
+
+
 ###cell_wise e-types
-scp -r yroussel@bbpv1.epfl.ch:/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/sscx_cellwise_petilla_etypes.py ./
+aws s3 sync s3://openbluebrain/Model_Data/Brain_atlas/Mouse/ttypes_efeatures/releases/20122023/sscx_cellwise_petilla_etypes.py ./sscx_cellwise_petilla_etypes.py --no-sign-request
+
 
 ## Scala
 
 ### 34 degrees 
-scp -r yroussel@bbpv1.epfl.ch:/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/18122023/scala_34 ./
+aws s3 sync s3://openbluebrain/Model_Data/Brain_atlas/Mouse/ttypes_efeatures/releases/18122023/scala_34/ ./scala_34 --no-sign-request
+
+
 ### RT
-scp -r yroussel@bbpv1.epfl.ch:/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/19122023/scala_roomtemp ./
+aws s3 sync s3://openbluebrain/Model_Data/Brain_atlas/Mouse/ttypes_efeatures/releases/19122023/scala_roomtemp/ ./scala_roomtemp --no-sign-request
+
 
 ## Gouwens
-scp -r yroussel@bbpv1.epfl.ch:/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/allen_34_VCtx_partial ./
+aws s3 sync s3://openbluebrain/Model_Data/Brain_atlas/Mouse/ttypes_efeatures/releases/20122023/allen_34_VCtx_partial/ ./allen_34_VCtx_partial --no-sign-request
