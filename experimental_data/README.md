@@ -19,7 +19,9 @@ python rna/dl_rna_data_scala.py
 # GOUWENS:
 ### in 'probabilistic_mapping_extension/experimental_data/gouwens/' execute
 
-##metadata
+## metadata
+./20200625_patchseq_metadata_mouse.csv
+./20200711_patchseq_metadata_mouse(1).csv
 
 ## Electrophysiology
 dandi download DANDI:000020/0.210913.1639
@@ -35,7 +37,7 @@ python rna/dl_rna_data_gouwens.py
 
 # canonical m_types (Kanari et al.)
 
-/local/test_cluster.csv
+./canonical m-types/test_cluster.csv
 
 
 # e-features from EFel
