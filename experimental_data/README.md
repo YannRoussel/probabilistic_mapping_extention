@@ -1,6 +1,7 @@
 # SCALA:
+### in 'probabilistic_mapping_extension/experimental_data/scala/' execute
 
-##metadata
+## metadata
 https://download.brainimagelibrary.org/3a/88/3a88a7687ab66069/m1_patchseq_meta_data.csv  
 
 ## Electrophysiology:
@@ -16,6 +17,7 @@ python morphologies/dl_scala_morphologies.py
 python rna/dl_rna_data_scala.py
 
 # GOUWENS:
+### in 'probabilistic_mapping_extension/experimental_data/gouwens/' execute
 
 ##metadata
 
@@ -29,9 +31,9 @@ python morphologies/dl_gouwens_morphologies.py
 python rna/dl_rna_data_gouwens.py
 
 # Yao et al. realigned
-sh download_rna.sh
+### obtain the t-types cluster 'median rna expression' and 'trimmed mean rna expression' by running the pipeline at https://github.com/BlueBrain/Molsys-transcriptomic-atlas
 
-# canonical m_types (Lida's)
+# canonical m_types (Kanari et al.)
 
 /local/test_cluster.csv
 
