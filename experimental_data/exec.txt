@@ -38,23 +38,5 @@ sh download_rna.sh
 
 # e-features from EFel
 
-## BBP
-
-### collection of cells
-/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/18122023
-### cell_wise
-/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/sscx_cellwise
-###cell_wise e-types
-/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/sscx_cellwise_petilla_etypes.py
-
-## Scala
-
-### 34 degrees 
-/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/18122023
-
-### RT
-/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/19122023/scala_roomtemp 
-
-## Gouwens
-/gpfs/bbp.cscs.ch/project/proj136/placeholder_singlecell/ttypes_efeatures/releases/20122023/allen_34_VCtx_partial
+sh e_features/dl_e_features.sh
 
