@@ -20,7 +20,7 @@ python rna/dl_rna_data_scala.py
 ### in 'probabilistic_mapping_extension/experimental_data/gouwens/' execute
 
 ## metadata
-./20200625_patchseq_metadata_mouse.csv
+./20200625_patchseq_metadata_mouse.csv \n
 ./20200711_patchseq_metadata_mouse(1).csv
 
 ## Electrophysiology
